@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import br.ufv.sin141.presentation.view.AutomatonView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.ufv.sin141.presentation.panel.SimulationController">
+
+    <top>
+        <VBox spacing="6">
+            <padding><Insets top="10" right="10" bottom="6" left="10"/></padding>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Palavra:"/>
+                <TextField fx:id="wordField" promptText="ex: bba" HBox.hgrow="ALWAYS"/>
+                <Button text="Simular Entrada" onAction="#onSimulate"
+                        style="-fx-font-weight: bold;"/>
+                <Separator orientation="VERTICAL"/>
+                <Button text="Recarregar AFD" onAction="#onRefreshDfa"/>
+            </HBox>
+            <Label fx:id="statusLabel" text="" wrapText="true"/>
+        </VBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.55">
+            <items>
+                <AutomatonView fx:id="dfaView"/>
+                <VBox spacing="10">
+                    <padding><Insets top="8" right="10" bottom="10" left="10"/></padding>
+                    <Label fx:id="resultLabel" text="aguardando simulação" maxWidth="Infinity"/>
+                    <Label fx:id="reasonLabel" text="" wrapText="true"/>
+                    <Label text="Caminho percorrido" style="-fx-font-weight: bold;"/>
+                    <TableView fx:id="stepsTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="positionColumn" text="#" prefWidth="50"/>
+                            <TableColumn fx:id="fromColumn" text="De" prefWidth="100"/>
+                            <TableColumn fx:id="symbolColumn" text="Símbolo" prefWidth="80"/>
+                            <TableColumn fx:id="toColumn" text="Para" prefWidth="100"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </items>
+        </SplitPane>
+    </center>
+</BorderPane>

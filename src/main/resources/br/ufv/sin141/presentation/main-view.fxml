@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.ufv.sin141.presentation.MainViewController">
+    <center>
+        <TabPane tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab text="Definição">
+                    <content>
+                        <fx:include source="panel/automaton-definition-view.fxml"/>
+                    </content>
+                </Tab>
+                <Tab text="Conversões">
+                    <content>
+                        <fx:include source="panel/conversions-view.fxml"/>
+                    </content>
+                </Tab>
+                <Tab text="Simulação">
+                    <content>
+                        <fx:include source="panel/simulation-view.fxml"/>
+                    </content>
+                </Tab>
+                <Tab text="Gramática Regular">
+                    <content>
+                        <fx:include source="panel/grammar-view.fxml"/>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+</BorderPane>

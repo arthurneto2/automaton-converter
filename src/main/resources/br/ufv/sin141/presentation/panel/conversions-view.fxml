@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import br.ufv.sin141.presentation.view.AutomatonView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.ufv.sin141.presentation.panel.ConversionsController">
+
+    <top>
+        <VBox spacing="6">
+            <padding><Insets top="10" right="10" bottom="6" left="10"/></padding>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button text="Recarregar Original" onAction="#onRefreshOriginal"/>
+                <Separator orientation="VERTICAL"/>
+                <Button text="Converter AFN → AFD" onAction="#onConvertToDfa"
+                        style="-fx-font-weight: bold;"/>
+                <Button text="Minimizar AFD" onAction="#onMinimizeDfa"
+                        style="-fx-font-weight: bold;"/>
+            </HBox>
+            <Label fx:id="statusLabel" text="" wrapText="true"/>
+        </VBox>
+    </top>
+
+    <center>
+        <HBox spacing="8">
+            <padding><Insets top="0" right="10" bottom="10" left="10"/></padding>
+            <AutomatonView fx:id="originalView" HBox.hgrow="ALWAYS"/>
+            <AutomatonView fx:id="dfaView" HBox.hgrow="ALWAYS"/>
+            <AutomatonView fx:id="minimizedView" HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </center>
+</BorderPane>
