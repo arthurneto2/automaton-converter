@@ -63,68 +63,64 @@ Abaixo é apresentado um diagrama de classes simplificado evidenciando a modelag
 classDiagram
     direction TB
 
-    package domain.model {
-        class State {
-            - String id
-            - boolean isInitial
-            - boolean isAccepting
-        }
-
-        class Transition {
-            - String symbol
-            + EPSILON : String
-            + getOrigin() State
-            + getTargets() Set~State~
-        }
-
-        class Automaton {
-            <<abstract>>
-            - Set~State~ states
-            - Set~String~ alphabet
-            - State initialState
-            - Set~Transition~ transitions
-            + getTransitionsFrom(State, String) Set~State~
-        }
-
-        class Nfa {
-            + Nfa(...)
-        }
-
-        class Dfa {
-            + Dfa(...)
-        }
-
-        class ProductionRule {
-            - String leftHandSide
-            - String rightHandSideTerminal
-            - String rightHandSideNonTerminal
-            + isEpsilon() boolean
-        }
-
-        class RegularGrammar {
-            - Set~String~ nonTerminals
-            - Set~String~ terminals
-            - String startSymbol
-        }
+    class State {
+        - String id
+        - boolean isInitial
+        - boolean isAccepting
     }
 
-    package domain.service {
-        class SubsetConstructionService {
-            + convertNfaToDfa(Nfa nfa) Dfa
-        }
-        
-        class HopcroftMinimizationService {
-            + minimizeDfa(Dfa dfa) Dfa
-        }
+    class Transition {
+        - String symbol
+        + EPSILON : String
+        + getOrigin() State
+        + getTargets() Set~State~
+    }
 
-        class GrammarConverterService {
-            + toAutomaton(RegularGrammar grammar) Automaton
-            + toGrammar(Automaton automaton) RegularGrammar
-        }
+    class Automaton {
+        <<abstract>>
+        - Set~State~ states
+        - Set~String~ alphabet
+        - State initialState
+        - Set~Transition~ transitions
+        + getTransitionsFrom(State, String) Set~State~
+    }
 
-        class SimulationService {
-            + simulateWithTrace(Dfa dfa, String word) SimulationTrace
-        }
+    class Nfa {
+        + Nfa(...)
+    }
+
+    class Dfa {
+        + Dfa(...)
+    }
+
+    class ProductionRule {
+        - String leftHandSide
+        - String rightHandSideTerminal
+        - String rightHandSideNonTerminal
+        + isEpsilon() boolean
+    }
+
+    class RegularGrammar {
+        - Set~String~ nonTerminals
+        - Set~String~ terminals
+        - String startSymbol
+    }
+
+    class SubsetConstructionService {
+        + convertNfaToDfa(Nfa nfa) Dfa
+    }
+    
+    class HopcroftMinimizationService {
+        + minimizeDfa(Dfa dfa) Dfa
+    }
+
+    class GrammarConverterService {
+        + toAutomaton(RegularGrammar grammar) Automaton
+        + toGrammar(Automaton automaton) RegularGrammar
+    }
+
+    class SimulationService {
+        + simulateWithTrace(Dfa dfa, String word) SimulationTrace
     }
 
     Automaton <|-- Nfa
