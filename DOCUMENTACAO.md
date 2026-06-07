@@ -149,19 +149,23 @@ A interface gráfica foi dividida em abas (Tabs) para separar as lógicas.
 
 ### 5.1. Tela Principal: Definição de Autômato (AFN/AFD)
 Esta aba permite ao usuário definir o autômato original. Contém as tabelas para entrada de estados, definição de alfabeto e a grade de transições.
-> **[ INSIRA AQUI A CAPTURA DE TELA DA ABA "DEFINIÇÃO DE AUTÔMATO" ]**
+
+![Definição de Automato](DefiniçãodeAutomato.png)
 
 ### 5.2. Aba de Conversões e Minimização
 Painel dedicado para visualização do AFN e conversão para AFD (via botão de ação). Também possui a funcionalidade para minimizar o AFD resultante, exibindo um comparativo visual em tabelas e gráficos.
-> **[ INSIRA AQUI A CAPTURA DE TELA DA ABA DE CONVERSÕES ]**
+
+![Conversões e Minimização](conversoes.png)
 
 ### 5.3. Aba de Simulação
 Tela onde o usuário pode testar palavras no autômato ativo. Apresenta um input de texto, um botão de "Simular" e uma visualização em formato de log/trace demonstrando o passo a passo da leitura dos símbolos e o resultado final (ACEITO / REJEITADO).
-> **[ INSIRA AQUI A CAPTURA DE TELA DA ABA DE SIMULAÇÃO MOSTRANDO UMA PALAVRA SENDO ACEITA/REJEITADA ]**
+
+![Simulação](simulacao.png)
 
 ### 5.4. Aba de Gramática Regular
 Interface para entrada textual de regras gramaticais (ex: `S -> aA | bB | ε`). Possui botões que acionam os serviços de conversão mútua (`GR -> AF` e `AF -> GR`), exibindo o resultado formatado.
-> **[ INSIRA AQUI A CAPTURA DE TELA DA ABA DE GRAMÁTICA ]**
+
+![Gramática Regular](gr.png)
 
 ---
 *Documento gerado em cumprimento aos critérios de avaliação do Projeto 1 - SIN 141.*
