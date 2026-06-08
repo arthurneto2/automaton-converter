@@ -19,69 +19,104 @@ O projeto segue uma arquitetura em camadas para separação de responsabilidades
 
 ---
 
-## 3. Detalhamento das Classes (Funcionalidades)
+## 3. Detalhamento das Classes e Funções (`domain.model`)
 
-### Camada de Modelo (`domain.model`)
-1. **`Automaton` (Abstrata)**: Define a estrutura base de um autômato (Estados, Alfabeto, Transições, Estado Inicial).
-2. **`Dfa` e `Nfa`**: Especializações para Autômatos Finitos Determinísticos e Não-Determinísticos.
-3. **`State`**: Representa um estado do autômato, contendo seu ID e se é inicial ou de aceitação.
-4. **`Transition`**: Representa a transição entre estados por um símbolo do alfabeto (incluindo o símbolo vazio &epsilon;).
-5. **`RegularGrammar`**: Representa a Quádrupla (N, T, P, S).
-6. **`ProductionRule`**: Modela as produções da gramática (ex: `A -> aB` ou `A -> a`).
+Nesta camada, as classes foram projetadas para serem majoritariamente **imutáveis**, garantindo que o estado de um autômaton ou gramática não seja alterado após sua criação, o que previne bugs colaterais.
+
+1. **`Automaton` (Abstrata)**: 
+   - **Função**: Serve como contrato base para DFA e NFA. 
+   - **Responsabilidade**: Armazena o quíntuplo $\{\Sigma, Q, \delta, q_0, F\}$ e fornece métodos de conveniência como `getTransitionsFrom(state, symbol)` e `getAcceptingStates()`.
+
+2. **`State`**: 
+   - **Função**: Representa um estado único no sistema. 
+   - **Detalhe**: Utiliza o campo `id` (String) como chave primária. Sobrescreve `equals` e `hashCode` para permitir o uso eficiente em `HashSet` e `HashMap`.
+
+3. **`Transition`**: 
+   - **Função**: Mapeia um par `(Origem, Símbolo)` a um conjunto de `Destinos`.
+   - **Diferencial**: Suporta transições vazias (&epsilon;) usando uma constante `EPSILON = ""`. Em DFAs, o conjunto de destinos sempre contém exatamente um elemento (ou zero, se não houver transição).
+
+4. **`RegularGrammar`**: 
+   - **Função**: Encapsula a quádrupla $\{N, T, P, S\}$.
+   - **Validação**: No momento da criação, garante que o símbolo inicial pertença aos Não-Terminais.
+
+5. **`ProductionRule`**: 
+   - **Função**: Modela regras de produção lineares à direita.
+   - **Formatos suportados**: `A -> aB` (Terminal seguido de Não-Terminal), `A -> a` (Apenas Terminal) e `S -> &epsilon;` (Epsilon, restrito ao símbolo inicial).
 
 ---
 
 ## 4. Lógica de Negócio e Algoritmos (`domain.service`)
 
-### A. Conversão de Gramática Regular (GR) para Autômato (NFA)
-*Classe: `GrammarConverterService`*
-- **Lógica:**
-    - Cada **Não-Terminal** da gramática torna-se um **Estado** no autômato.
-    - O Símbolo Inicial da gramática torna-se o **Estado Inicial**.
-    - Produções do tipo `A -> aB` geram uma transição `&delta;(A, a) = B`.
-    - Produções do tipo `A -> a` geram uma transição `&delta;(A, a) = F`, onde `F` é um estado final criado automaticamente.
-    - Se houver `S -> &epsilon;`, o estado inicial também é marcado como de aceitação.
-
-### B. Conversão de Autômato para Gramática Regular (GR)
-*Classe: `GrammarConverterService`*
-- **Lógica:**
-    - Cada **Estado** vira um **Não-Terminal**.
-    - Transições `&delta;(S1, a) = S2` geram a regra `S1 -> aS2`.
-    - Se o estado de destino `S2` for de aceitação, gera-se também a regra terminal `S1 -> a`.
-    - Se o estado inicial for de aceitação, adiciona-se a produção de &epsilon; (`S -> &epsilon;`).
-
-### C. Conversão de NFA para DFA (Construção de Subconjuntos)
+### A. Conversão NFA para DFA (Subset Construction)
 *Classe: `SubsetConstructionService`*
-- **Lógica:**
-    - Utiliza o algoritmo de **fecho-&epsilon;** (epsilon-closure).
-    - Cada novo estado no DFA representa um **conjunto de estados** do NFA.
-    - O estado inicial do DFA é o fecho-&epsilon; do estado inicial do NFA.
-    - Um estado do DFA é de aceitação se contiver pelo menos um estado de aceitação do NFA original.
+- **Algoritmo**: Construção de Subconjuntos (Powerset Construction).
+- **Passos Detalhados**:
+    1. **Epsilon-Closure**: Para qualquer estado ou conjunto de estados, calcula-se recursivamente todos os estados alcançáveis via &epsilon;.
+    2. **Função Move**: Calcula para onde um conjunto de estados vai dado um símbolo $a$.
+    3. **Mapeamento de Estados**: Cada estado do DFA gerado é nomeado com base no conjunto de estados do NFA que ele representa (ex: `{q0, q1}`).
+    4. **Estado Morto (Dead State)**: O algoritmo identifica transições indefinidas e as direciona para um "Estado Morto" `{}` para garantir que o DFA seja completo (útil para certas provas teóricas).
 
-### D. Minimização de DFA (Algoritmo de Hopcroft)
+### B. Minimização de DFA (Algoritmo de Hopcroft)
 *Classe: `HopcroftMinimizationService`*
-- **Lógica:**
-    - Primeiro, remove-se os estados inalcançáveis.
-    - Divide os estados em dois grupos iniciais: **Aceitação** e **Não-Aceitação**.
-    - Refina a partição recursivamente: dois estados permanecem no mesmo grupo apenas se, para cada símbolo do alfabeto, eles transitam para estados que também estão no mesmo grupo (equivalência de estados).
+- **Algoritmo**: Particionamento de Refinamento.
+- **Lógica Profunda**:
+    1. **Eliminação de Inalcançáveis**: Primeiro, realiza um BFS a partir do estado inicial para remover estados que não podem ser visitados.
+    2. **Partição Inicial**: Divide os estados em dois grupos: $P_0 = \{F, Q-F\}$ (Finais e Não-Finais).
+    3. **Refinamento Iterativo**: Para cada grupo $G$ na partição, verifica se todos os estados em $G$ transitam para o mesmo grupo $G'$ dado um símbolo $a$. Se um estado "destoa", o grupo é quebrado.
+    4. **Convergência**: O algoritmo para quando nenhum grupo pode mais ser refinado (ponto fixo).
+
+### C. Conversão entre GR e Automatos
+*Classe: `GrammarConverterService`*
+- **GR para NFA**:
+    - $A \to aB \implies \delta(A, a) = B$
+    - $A \to a \implies \delta(A, a) = F$ (onde $F$ é um estado final comum criado para fechar as produções terminais).
+- **Automato para GR**:
+    - Cada estado torna-se um Não-Terminal.
+    - Se $\delta(S1, a) = S2$, gera $S1 \to aS2$.
+    - Se $S2 \in F$ (é final), gera também a produção terminal $S1 \to a$.
 
 ---
 
-## 5. Simulação e Validação
+## 5. Estruturas de Dados e Decisões de Projeto
+
+A escolha das estruturas de dados foi guiada pela eficiência computacional e pela fidelidade aos conceitos matemáticos:
+
+1. **`Set` (HashSet e LinkedHashSet)**:
+   - **Por que?** A definição de autômatos e gramáticas baseia-se fortemente em **Conjuntos** (Alfabeto, Estados, Não-Terminais). 
+   - **Vantagem**: Garante que não existam estados ou transições duplicadas e oferece busca em tempo constante $O(1)$.
+   - **Nota**: Usamos `LinkedHashSet` na apresentação para garantir que a ordem de exibição na interface seja previsível e consistente.
+
+2. **`Map` (HashMap e LinkedHashMap)**:
+   - **Uso**: No algoritmo de Hopcroft para mapear estados a seus respectivos grupos de partição, e no Subset Construction para mapear conjuntos de estados de NFA para novos estados de DFA.
+   - **Eficiência**: Permite a detecção rápida de equivalência de estados via assinaturas de transição.
+
+3. **`Deque` (ArrayDeque)**:
+   - **Uso**: Implementação de pilhas e filas para os algoritmos de BFS (Reachable States) e Epsilon-Closure.
+   - **Por que?** Mais performático que `Stack` ou `LinkedList` em Java para operações de push/pop.
+
+4. **Imutabilidade e Records**:
+   - As classes de modelo não possuem "setters". Isso garante que uma vez que o sistema validou uma gramática ou autômato, ele permanece íntegro durante toda a simulação, evitando erros comuns de estado inconsistente.
+
+---
+
+## 6. Simulação, Validação e Interface
+
+### A. Simulação e Trace
 *Classe: `SimulationService`*
-- Implementa a lógica de percorrer o autômato com uma cadeia de entrada.
-- Retorna um **Trace** (rastreamento), permitindo ao usuário visualizar passo a passo quais estados foram visitados, facilitando a depuração pedagógica.
+- **Trace de Execução**: Em vez de apenas retornar "Aceita/Rejeita", o serviço gera uma `SimulationTrace`.
+- **Lógica**: Utiliza uma abordagem determinística para DFA (segue um caminho) e mantém o histórico de cada passo (Estado Atual, Símbolo Consumido, Próximo Estado).
 
----
+### B. Parser de Gramática
+*Classe: `GrammarTextParser`*
+- **Função**: Transforma a entrada de texto do usuário (ex: `S -> aS | b`) em objetos `RegularGrammar`.
+- **Algoritmo**: Utiliza Expressões Regulares (Regex) para validar a sintaxe de cada linha e extrair Terminais e Não-Terminais, lançando `MalformedGrammarException` em caso de erro.
 
-## 6. Interface e UX (`presentation`)
-- **Visualização de Grafo**: Uso de visualização personalizada para desenhar os estados e transições de forma intuitiva.
-- **Tabela de Transição**: Exibição tabular para conferência rápida da lógica do autômato.
-- **Editor de Gramática**: Campo de texto que utiliza o `GrammarTextParser` para validar a sintaxe da gramática em tempo real.
+### C. Camada de Apresentação (JavaFX)
+- **`MainViewController`**: Orquestra a troca de painéis (Gramática, Definição, Conversão, Simulação).
+- **`AutomatonGraphView`**: Utiliza cálculos de geometria básica para renderizar estados como círculos e transições como setas/arcos, permitindo a visualização dinâmica do grafo.
+- **`ConversionsController`**: Atua como ponte entre a UI e os serviços de conversão (`SubsetConstructionService`, `HopcroftMinimizationService`).
 
 ---
 
 ## 7. Conclusão
-- O sistema demonstra a equivalência entre GR e AF.
-- A implementação modular permite fácil extensão (ex: adicionar suporte a Expressões Regulares no futuro).
-- A ferramenta cumpre seu papel didático ao transformar conceitos abstratos em visualizações concretas.
+O sistema demonstra a equivalência entre GR e AF através de uma implementação modular. A separação clara entre a **Matemática** (model), os **Algoritmos** (service) e a **Interface** (presentation) permite que o código seja usado tanto como uma ferramenta prática quanto como uma base de estudo para estudantes de Teoria da Computação.
